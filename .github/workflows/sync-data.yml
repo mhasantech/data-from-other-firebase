@@ -23,4 +23,5 @@ jobs:
       - name: Run sync script
         env:
           SOURCE_FIREBASE_SA: ${{ secrets.SOURCE_FIREBASE_SA }}
+          TARGET_FIREBASE_SA: ${{ secrets.TARGET_FIREBASE_SA }}
         run: node scripts/sync-data.js
