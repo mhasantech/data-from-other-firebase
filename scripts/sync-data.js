@@ -1,37 +1,31 @@
 const admin = require('firebase-admin');
 
-// চেক করা সিক্রেট আছে কিনা
+// সোর্স প্রোজেক্ট (যেখান থেকে ডেটা আসবে)
 if (!process.env.SOURCE_FIREBASE_SA) {
-    console.error('❌ SOURCE_FIREBASE_SA সিক্রেট নেই!');
+    console.error('❌ SOURCE_FIREBASE_SA সিক্রেন্ট নেই!');
     process.exit(1);
 }
-
-// সোর্স প্রোজেক্ট কানেক্ট (যেখানে ডাটা আছে)
-let sourceServiceAccount;
-try {
-    sourceServiceAccount = JSON.parse(process.env.SOURCE_FIREBASE_SA);
-    console.log('✅ সোর্স প্রোজেক্ট JSON ঠিক আছে');
-} catch (e) {
-    console.error('❌ JSON পার্স করতে ব্যর্থ:', e.message);
-    process.exit(1);
-}
-
+const sourceServiceAccount = JSON.parse(process.env.SOURCE_FIREBASE_SA);
 const sourceApp = admin.initializeApp({
     credential: admin.credential.cert(sourceServiceAccount)
 }, 'sourceApp');
 const sourceDb = sourceApp.firestore();
 
-// টার্গেট প্রোজেক্ট (আপনার বর্তমান অ্যাপের ফায়ারবেস)
-if (admin.apps.length === 0) {
-    admin.initializeApp();
+// টার্গেট প্রোজেক্ট (আপনার বর্তমান অ্যাপ, যেখানে ডেটা সেভ হবে)
+if (!process.env.TARGET_FIREBASE_SA) {
+    console.error('❌ TARGET_FIREBASE_SA সিক্রেন্ট নেই!');
+    process.exit(1);
 }
-const targetDb = admin.firestore();
+const targetServiceAccount = JSON.parse(process.env.TARGET_FIREBASE_SA);
+const targetApp = admin.initializeApp({
+    credential: admin.credential.cert(targetServiceAccount)
+}, 'targetApp');
+const targetDb = targetApp.firestore();
 
 async function syncCollection(collectionName) {
     console.log(`⏳ ${collectionName} সিঙ্ক শুরু...`);
     const snapshot = await sourceDb.collection(collectionName).get();
     console.log(`   পাওয়া গেছে ${snapshot.size} টি ডকুমেন্ট`);
-    
     if (snapshot.empty) return 0;
     
     let batch = targetDb.batch();
