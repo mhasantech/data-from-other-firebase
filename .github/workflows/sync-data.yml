@@ -2,6 +2,9 @@ name: Sync Data from Other Firebase
 
 on:
   schedule:
+    # বাংলাদেশ সময় দুপুর ১২:০০ = UTC ০৬:০০
+    - cron: '0 6 * * *'
+    # বাংলাদেশ সময় বিকাল ০৪:০০ = UTC ১০:০০
     - cron: '0 10 * * *'
   workflow_dispatch:
 
